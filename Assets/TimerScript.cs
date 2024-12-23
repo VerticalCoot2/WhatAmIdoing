@@ -4,6 +4,8 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using Unity.VisualScripting;
+using System;
+using System.Text;
 
 public class TimerScript : MonoBehaviour
 {
@@ -26,8 +28,9 @@ public class TimerScript : MonoBehaviour
     [SerializeField] TMP_InputField inf;
 
     //time
-    //[Header("\nTime")]
-    int[] time = { 0, 0, 0 };
+    [Header("\nTime")]
+    string time;
+    DateTime startTime;
     string finalTime;
 
     //gameObjects
@@ -65,18 +68,18 @@ public class TimerScript : MonoBehaviour
 
         popupPanel.SetActive(false);
         savedThingsPanel.SetActive(false);
-        visualizeTime();
+        //visualizeTime();
         startBtn.interactable = true;
         stopBtn.interactable = false;
         saveButton.interactable = false;
     }
 
     public void StartTiming()
-    {        
+    {
+        startTime = DateTime.Now;
         startBtn.interactable = false;
         stopBtn.interactable = true;
         _timing = true;
-        StartCoroutine(Timing());
     }
 
     public void StopTiming()
@@ -85,15 +88,25 @@ public class TimerScript : MonoBehaviour
         finalTime = timerText.text;
         _timing = false;
         stopBtn.interactable = false;
-        StopCoroutine(Timing());
         popupPanel.SetActive(true);
         uHaveSMTG.text = "You've worked:\n" + finalTime;
         saveShitButton.SetActive(false);
     }
 
+    StringBuilder sb = new StringBuilder();
+    private void Update()
+    {
+        if(_timing)
+        {
+            TimeSpan sajt = DateTime.Now - startTime;
+            string help = sajt.ToString(@"hh\:mm\:ss\." + sb);
+            timerText.text = help.Remove(help.Length - 1);
+        }
+    }
+
     public void Typed()
     {
-        if(saveButton.interactable == false)
+        if(!saveButton.interactable)
         {
             saveButton.interactable = true;
         }
@@ -101,24 +114,21 @@ public class TimerScript : MonoBehaviour
 
     public void openSavedThings()
     {
-        switch(savedThingsPanel.activeSelf)
+        if(savedThingsPanel.activeSelf)
         {
-            case false:
-                sScrpt.Loading();
-                StartCoroutine(openSaveThings());
-                break;
-
-            case true:
-                StartCoroutine(CloseSaveThings());
-                break;
+            StartCoroutine(CloseSaveThings());
+        }else
+        {
+            sScrpt.Loading();
+            StartCoroutine(openSaveThings());
         }
     }
 
     IEnumerator openSaveThings()
     {
         savedThingsPanel.SetActive(true);
-        deleteSaveShitButton.SetActive(true);
         savedButton.SetBool("menuOpen", true);
+        deleteSaveShitButton.SetActive(true);                
         deleteButtonButton.interactable = false;
         savedButtonButton.interactable = false;
         deletePanelGO.SetActive(false);
@@ -195,64 +205,4 @@ public class TimerScript : MonoBehaviour
         yield return new WaitForSecondsRealtime(0.2f);
         deletePanelGO.SetActive(false);
     }
-
-
-
-
-    public IEnumerator Timing()
-    {
-        while (_timing)
-        {
-            yield return new WaitForSecondsRealtime(faszom);
-            
-            time[2]++;
-
-            if (time[2]>=60)
-            {
-                time[2] = 0;
-                time[1]++;
-
-                if(time[1] >= 60)
-                {
-                    time[1] = 0;
-                    time[0]++;
-                }
-            }
-
-            visualizeTime();
-        }
-        for (int i = 0; i < 3; i++)
-        {
-            time[i] = 0;
-        }
-        visualizeTime();
-    }
-
-    public void visualizeTime()
-    {
-        string help = "";
-        for(int i = 0;i < 3; i++)
-        {
-            if (time[i] >= 10)
-            {
-                help += time[i];
-            }else
-            {
-                help += "0" + time[i];
-            }
-            switch(i)
-            {
-                case 2:
-                    break;
-
-                default:
-                    help += ':';
-                    break;
-            }
-                
-        }
-        timerText.text = help;
-    }
-    
-
 }

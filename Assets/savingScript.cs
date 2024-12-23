@@ -47,9 +47,8 @@ public class savingScript : MonoBehaviour
                 ts.LoadWrite(help);
             } while (!be.EndOfStream);
         }
-        catch(Exception exc)
+        catch
         {
-            Debug.Log("Something went wrong: " + exc);
             ts.LoadWrite("No saves yet");
         }
 
